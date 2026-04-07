@@ -1,0 +1,15 @@
+# Flutter
+benaa_pro/build/
+benaa_pro/.dart_tool/
+benaa_pro/.idea/
+
+# Python
+benaa_backend/__pycache__/
+benaa_backend/.venv/
+benaa_backend/env/
+
+# General
+*.log
+*.sqlite3
+.envgit add .
+.env
