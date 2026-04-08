@@ -51,7 +51,6 @@ app.*.map.json
 **/*.pyc
 **/.env
 **/bin/
-**/lib/
 **/include/
 **/share/
 

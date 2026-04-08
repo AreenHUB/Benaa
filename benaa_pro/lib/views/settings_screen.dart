@@ -1,14 +1,19 @@
+import 'package:benaa_pro/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
-class SettingsScreen extends StatefulWidget {
+// حولناها إلى ConsumerStatefulWidget لنتمكن من استخدام ref
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final TextEditingController companyCtrl = TextEditingController();
 
   @override
@@ -17,7 +22,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadCompanyName();
   }
 
-  // دالة لجلب اسم الشركة المحفوظ سابقاً
   Future<void> _loadCompanyName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -25,7 +29,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  // دالة لحفظ اسم الشركة
   Future<void> _saveCompanyName(String name) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('company_name', name);
@@ -41,6 +44,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final companyName = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    companyCtrl.text = companyName;
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -55,7 +61,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch, // لجعل الأزرار تأخذ العرض كاملاً
           children: [
             const Text(
               "إعدادات التقارير الرسمية",
@@ -74,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextField(
               controller: companyCtrl,
               decoration: InputDecoration(
-                labelText: "اسم الشركة (مثال: شركة النخبة للمقاولات)",
+                labelText: "اسم الشركة",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -91,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               onPressed: () {
                 FocusScope.of(context).unfocus();
-                _saveCompanyName(companyCtrl.text);
+                notifier.updateCompanyName(companyCtrl.text);
               },
               child: const Text(
                 "حفظ الإعدادات",
@@ -102,6 +109,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+
+            const Spacer(), // لدفع زر تسجيل الخروج لأسفل الشاشة
+            const Divider(),
+
+            // زر تسجيل الخروج
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[50],
+                foregroundColor: Colors.red,
+                elevation: 0,
+                minimumSize: const Size(double.infinity, 50),
+                side: const BorderSide(color: Colors.red),
+              ),
+              icon: const Icon(Icons.logout),
+              label: const Text(
+                "تسجيل الخروج",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              onPressed: () {
+                // 1. مسح التوكن وتسجيل الخروج
+                ref.read(authProvider.notifier).logout();
+                // 2. الانتقال لشاشة الدخول ومسح الشاشات السابقة من الذاكرة
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

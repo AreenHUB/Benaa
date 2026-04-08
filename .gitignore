@@ -3,13 +3,16 @@ benaa_pro/build/
 benaa_pro/.dart_tool/
 benaa_pro/.idea/
 
+# ❗ لا تضيف lib هون (مهم)
+
 # Python
+benaa_backend/venv/
 benaa_backend/__pycache__/
-benaa_backend/.venv/
-benaa_backend/env/
+
+# Secrets
+.env
 
 # General
 *.log
-*.sqlite3
-.envgit add .
 .env
+venv/

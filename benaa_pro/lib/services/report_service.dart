@@ -11,6 +11,7 @@ class ReportService {
     required String steel,
     String? city,
     String? weatherAdvice,
+    String? companyName,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final companyName = prefs.getString('company_name') ?? 'BENAA PRO';
@@ -32,7 +33,7 @@ class ReportService {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
-                      companyName,
+                      companyName ?? "BENAA PRO",
                       style: pw.TextStyle(
                         fontSize: 24,
                         fontWeight: pw.FontWeight.bold,

@@ -17,27 +17,28 @@ class CalculationRecord {
     required this.totalCost,
   });
 
-  // تحويل الكائن إلى Map لتخزينه
   Map<String, dynamic> toMap() {
     return {
       'date': date,
-      'elementType': elementType,
+      'element_type': elementType,
       'count': count,
-      'concrete': concrete,
-      'steel': steel,
-      'totalCost': totalCost,
+      'concrete_m3': concrete,
+      'steel_tons': steel,
+      'total_cost': totalCost,
     };
   }
 
-  // استرجاع الكائن من Map
+  // تم تصحيح المفاتيح هنا لتتطابق مع الـ JSON القادم من FastAPI
   factory CalculationRecord.fromMap(Map<String, dynamic> map) {
     return CalculationRecord(
-      date: map['date'] ?? '',
-      elementType: map['elementType'] ?? '',
-      count: map['count']?.toInt() ?? 0,
-      concrete: map['concrete']?.toDouble() ?? 0.0,
-      steel: map['steel']?.toDouble() ?? 0.0,
-      totalCost: map['totalCost']?.toDouble() ?? 0.0,
+      date: map['date'] ?? 'تم الحفظ سحابياً',
+      elementType: map['element_type'] ?? 'عنصر',
+      count:
+          map['count']?.toInt() ??
+          1, // وضعنا 1 كافتراضي في حال لم نرسله من السيرفر
+      concrete: map['concrete_m3']?.toDouble() ?? 0.0, // التصحيح هنا
+      steel: map['steel_tons']?.toDouble() ?? 0.0, // التصحيح هنا
+      totalCost: map['total_cost']?.toDouble() ?? 0.0, // التصحيح هنا
     );
   }
 
