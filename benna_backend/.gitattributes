@@ -1,0 +1,8 @@
+
+backend/** linguist-language=Python
+
+
+frontend/.dart_tool/** linguist-vendored
+frontend/build/** linguist-vendored
+frontend/ios/** linguist-vendored
+frontend/android/** linguist-vendored
