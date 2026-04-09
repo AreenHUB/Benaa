@@ -10,7 +10,6 @@ from app.services.calc_service import calculate_block_logic
 router = APIRouter()
 
 
-# غيرنا المسار هنا ليتطابق مع فلاتر
 @router.post("/calculations/structural")
 def compute(
     data: CalcInput,
@@ -18,19 +17,17 @@ def compute(
     current_user=Depends(get_current_user),
 ):
 
-    # 1. إجراء الحسابات
     single_volume = data.length * data.width * data.height_or_thickness
     total_volume = single_volume * data.count
     waste_factor = 1.05 if data.element_type == "سقف" else 1.03
 
     total_concrete = total_volume * waste_factor
-    steel_tons = (total_volume * 100) / 1000  # نسبة تقريبية
+    steel_tons = (total_volume * 100) / 1000
 
     concrete_cost = total_concrete * 320.0
     steel_cost = steel_tons * 2600.0
     total_cost = concrete_cost + steel_cost
 
-    # 2. الحفظ في قاعدة البيانات
     new_calc = Calculation(
         element_type=data.element_type,
         concrete_m3=total_concrete,
@@ -41,7 +38,6 @@ def compute(
     db.add(new_calc)
     db.commit()
 
-    # 3. إرجاع النتيجة بالشكل الذي يتوقعه فلاتر
     return {
         "success": True,
         "data": {
@@ -58,9 +54,6 @@ def compute(
     }
 
 
-# أضف هذا في نهاية ملف app/api/v1/calculator.py
-
-
 @router.get("/calculations/history")
 def get_history(
     skip: int = 0,
@@ -68,7 +61,7 @@ def get_history(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    # جلب الحسابات مع تطبيق التخطي والحد الأقصى (Pagination)
+
     history_records = (
         db.query(Calculation)
         .filter(Calculation.user_id == current_user.id)
@@ -100,17 +93,14 @@ def compute_blocks(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    # 1. المعالجة
+
     result = calculate_block_logic(data.length, data.height)
 
-    # 2. الحفظ في قاعدة البيانات
-    # سنستخدم نفس الجدول Calculation مع تحديد النوع كـ "طابوق"
     new_calc = Calculation(
         element_type="طابوق",
-        concrete_m3=0.0,  # الطابوق ليس خرسانة، نضع القيمة 0
+        concrete_m3=0.0,
         steel_tons=0.0,
-        total_cost=result["cement_bags"] * 15.0
-        + result["sand_m3"] * 50.0,  # تكلفة تقريبية للمواد
+        total_cost=result["cement_bags"] * 15.0 + result["sand_m3"] * 50.0,
         user_id=current_user.id,
     )
     db.add(new_calc)

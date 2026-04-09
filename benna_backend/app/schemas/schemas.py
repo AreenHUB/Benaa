@@ -21,7 +21,7 @@ class UserResponse(UserBase):
     id: int
 
     class Config:
-        from_attributes = True  # لربطها بـ SQLAlchemy
+        from_attributes = True
 
 
 class Token(BaseModel):

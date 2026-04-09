@@ -5,6 +5,7 @@ from fastapi import (
     status,
     Request,
 )  # أضف Request هنا
+from app.core.auth_deps import get_current_user
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.models import User
@@ -22,7 +23,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    # التحقق هل المستخدم موجود؟
+
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -48,7 +49,7 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = create_access_token(data={"sub": user.email})
-    # استخدم الدالة الجديدة هنا:
+
     from app.core.security import create_refresh_token
 
     refresh_token = create_refresh_token(data={"sub": user.email})
@@ -63,23 +64,23 @@ def login(
 from fastapi import Header
 
 
-from fastapi import Header, Request  # أضف Request
+from fastapi import Header, Request
 
 
 @router.post("/refresh")
 def refresh_token(request: Request, db: Session = Depends(get_db)):
-    # نحاول استخراج الهيدر بكل الطرق الممكنة لتجنب مشاكل الشرطة والـ Case
+
     refresh_token = request.headers.get("refresh-token") or request.headers.get(
         "Refresh-Token"
     )
 
     if not refresh_token:
-        # طباعة الهيدرات المستلمة في التيرمينال للتأكد مما يرسله الفلاتر فعلياً
+
         print("Headers received:", request.headers)
         raise HTTPException(status_code=400, detail="Refresh token missing")
 
     try:
-        # تأكد أن الـ SECRET_KEY هو نفسه المستخدم في كل مكان
+
         payload = jwt.decode(
             refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
@@ -89,3 +90,26 @@ def refresh_token(request: Request, db: Session = Depends(get_db)):
     except Exception as e:
         print("Refresh Error:", e)
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+
+from pydantic import BaseModel
+
+
+class ProfileUpdate(BaseModel):
+    company_name: str
+
+
+@router.get("/profile")
+def get_profile(current_user=Depends(get_current_user)):
+    return {"company_name": current_user.company_name}
+
+
+@router.put("/profile")
+def update_profile(
+    profile: ProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    current_user.company_name = profile.company_name
+    db.commit()
+    return {"success": True, "company_name": current_user.company_name}

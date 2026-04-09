@@ -8,7 +8,6 @@ from app.core.auth_deps import get_current_admin_user
 router = APIRouter()
 
 
-# لاحظ استخدام get_current_admin_user لحماية المسار
 @router.get("/dashboard-stats")
 def get_app_statistics(
     db: Session = Depends(get_db), admin_user=Depends(get_current_admin_user)
@@ -16,7 +15,6 @@ def get_app_statistics(
     total_users = db.query(User).count()
     total_calculations = db.query(Calculation).count()
 
-    # حساب إجمالي المبالغ المالية التي تم حسابها في التطبيق
     total_money_estimated = db.query(func.sum(Calculation.total_cost)).scalar() or 0.0
 
     return {

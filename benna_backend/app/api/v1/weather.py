@@ -34,7 +34,6 @@ async def get_pouring_advice(city: str):
             elif wind > 10:
                 advice_ar = "تنبيه: رياح قوية قد تسبب (Plastic Shrinkage). قم بتجهيز الخيش والماء للرش فوراً."
 
-            # هذا هو نفس الـ JSON الذي يتوقعه فلاتر بالضبط
             return {
                 "success": True,
                 "data": {

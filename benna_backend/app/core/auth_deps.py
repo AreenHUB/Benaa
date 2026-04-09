@@ -24,7 +24,7 @@ def get_current_user(
         if email is None:
             raise credentials_exception
     except JWTError:
-        # إرسال كود 401 مع رسالة واضحة للمبرمج
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
@@ -35,9 +35,6 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
-
-
-# أضف هذا في نهاية ملف app/core/auth_deps.py
 
 
 def get_current_admin_user(current_user: User = Depends(get_current_user)):
