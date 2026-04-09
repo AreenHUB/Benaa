@@ -4,14 +4,14 @@ from fastapi import (
     HTTPException,
     status,
     Request,
-)  # أضف Request هنا
+)
 from app.core.auth_deps import get_current_user
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.models import User
 from app.schemas.schemas import UserCreate, UserResponse
 from app.core.security import get_password_hash
-from fastapi import Request  # أضف هذا
+from fastapi import Request
 from app.core.rate_limit import limiter
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import verify_password, create_access_token

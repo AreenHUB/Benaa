@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'ai_assistant_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
 
@@ -15,6 +16,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
+    const AiAssistantScreen(),
     const HistoryScreen(),
     const SettingsScreen(),
   ];
@@ -24,6 +26,7 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -38,6 +41,10 @@ class _MainLayoutState extends State<MainLayout> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate),
             label: 'الحاسبة',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.smart_toy),
+            label: 'المستشار',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'السجل'),
           BottomNavigationBarItem(
