@@ -20,7 +20,6 @@ ENGINEERING_PROMPT = """
 async def ask_engineering_assistant(question: str) -> str:
     try:
         response = await client.chat.completions.create(
-            # تم تحديث اسم النموذج إلى النسخة الأحدث المدعومة
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": ENGINEERING_PROMPT},
