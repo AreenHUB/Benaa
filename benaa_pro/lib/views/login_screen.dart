@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'main_layout.dart';
-import 'register_screen.dart'; // سنقوم بإنشاء هذا الملف
+import 'register_screen.dart';
 
 class LoginScreen extends ConsumerWidget {
   final emailCtrl = TextEditingController();
@@ -66,22 +66,18 @@ class LoginScreen extends ConsumerWidget {
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 onPressed: () async {
-                  // إخفاء لوحة المفاتيح
                   FocusScope.of(context).unfocus();
 
-                  // استدعاء دالة الدخول التي ترجع الآن رسالة خطأ أو null
                   String? errorMessage = await ref
                       .read(authProvider.notifier)
                       .login(emailCtrl.text, passCtrl.text);
 
                   if (errorMessage == null) {
-                    // نجاح: الانتقال للشاشة الرئيسية
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (_) => const MainLayout()),
                     );
                   } else {
-                    // فشل: عرض رسالة الخطأ الدقيقة (شاملة حظر الـ 429)
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -90,8 +86,8 @@ class LoginScreen extends ConsumerWidget {
                         ),
                         backgroundColor: errorMessage.contains("حظر")
                             ? Colors.orange[800]
-                            : Colors.red, // لون برتقالي للحظر، أحمر للخطأ
-                        behavior: SnackBarBehavior.floating, // شكل أنيق للإشعار
+                            : Colors.red,
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   }
@@ -109,7 +105,6 @@ class LoginScreen extends ConsumerWidget {
               const SizedBox(height: 15),
               TextButton(
                 onPressed: () {
-                  // الانتقال لشاشة التسجيل
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => RegisterScreen()),

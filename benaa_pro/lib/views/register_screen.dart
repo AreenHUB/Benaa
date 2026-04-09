@@ -76,7 +76,7 @@ class RegisterScreen extends ConsumerWidget {
                         backgroundColor: Colors.green,
                       ),
                     );
-                    Navigator.pop(context); // العودة لشاشة الدخول
+                    Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

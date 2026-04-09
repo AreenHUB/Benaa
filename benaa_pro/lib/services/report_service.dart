@@ -5,7 +5,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReportService {
-  // دالة لتوليد الـ PDF وحفظه
   static Future<File> generateMaterialReport({
     required String concrete,
     required String steel,
@@ -17,8 +16,6 @@ class ReportService {
     final companyName = prefs.getString('company_name') ?? 'BENAA PRO';
     final pdf = pw.Document();
 
-    // ملاحظة: استخدمنا اللغة الإنجليزية في التقرير لأن اللغة العربية في الـ PDF
-    // تتطلب دمج ملف خط (TTF). واللغة الإنجليزية هي الشائعة لطلبات المواد (Material Request) في الإمارات.
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -28,7 +25,6 @@ class ReportService {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                // الترويسة (Header)
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
@@ -52,14 +48,12 @@ class ReportService {
                 pw.Divider(thickness: 2),
                 pw.SizedBox(height: 20),
 
-                // تاريخ التقرير
                 pw.Text(
                   "Date: ${DateTime.now().toString().split(' ')[0]}",
                   style: const pw.TextStyle(fontSize: 14),
                 ),
                 pw.SizedBox(height: 30),
 
-                // جدول الكميات الممحسوبة
                 pw.Text(
                   "1. Required Quantities:",
                   style: pw.TextStyle(
@@ -102,7 +96,6 @@ class ReportService {
 
                 pw.SizedBox(height: 30),
 
-                // توصيات الطقس (إذا قام المهندس بفحصها)
                 if (city != null && weatherAdvice != null) ...[
                   pw.Text(
                     "2. Site Advisor ($city):",
@@ -138,7 +131,6 @@ class ReportService {
       ),
     );
 
-    // حفظ الملف في المسار المؤقت للهاتف
     final output = await getTemporaryDirectory();
     final file = File(
       "${output.path}/Material_Request_${DateTime.now().millisecondsSinceEpoch}.pdf",

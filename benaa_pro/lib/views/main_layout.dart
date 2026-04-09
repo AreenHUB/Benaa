@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'history_screen.dart'; // تمت إضافة هذا
+import 'history_screen.dart';
 import 'settings_screen.dart';
 
 class MainLayout extends StatefulWidget {
@@ -15,7 +15,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HistoryScreen(), // تمت إضافة شاشة السجل هنا
+    const HistoryScreen(),
     const SettingsScreen(),
   ];
 
@@ -39,10 +39,7 @@ class _MainLayoutState extends State<MainLayout> {
             icon: Icon(Icons.calculate),
             label: 'الحاسبة',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history), // أيقونة السجل
-            label: 'السجل',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'السجل'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'الإعدادات',

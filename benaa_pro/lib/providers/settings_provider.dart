@@ -1,21 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../core/api_client.dart';
 
 class SettingsNotifier extends StateNotifier<String> {
-  SettingsNotifier() : super('BENAA PRO') {
-    _loadSettings();
-  }
+  SettingsNotifier() : super('BENAA PRO');
 
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getString('company_name') ?? 'BENAA PRO';
+  Future<void> loadProfile() async {
+    try {
+      final response = await ApiClient.instance.get('/auth/profile');
+      state = response.data['company_name'] ?? 'BENAA PRO';
+    } catch (e) {
+      state = 'BENAA PRO';
+    }
   }
 
   Future<void> updateCompanyName(String name) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('company_name', name);
-    state = name;
+    try {
+      await ApiClient.instance.put(
+        '/auth/profile',
+        data: {'company_name': name},
+      );
+      state = name;
+    } catch (e) {
+      throw Exception('فشل في حفظ اسم الشركة سحابياً');
+    }
+  }
+
+  void reset() {
+    state = 'BENAA PRO';
   }
 }
 

@@ -28,17 +28,14 @@ class CalculationRecord {
     };
   }
 
-  // تم تصحيح المفاتيح هنا لتتطابق مع الـ JSON القادم من FastAPI
   factory CalculationRecord.fromMap(Map<String, dynamic> map) {
     return CalculationRecord(
       date: map['date'] ?? 'تم الحفظ سحابياً',
       elementType: map['element_type'] ?? 'عنصر',
-      count:
-          map['count']?.toInt() ??
-          1, // وضعنا 1 كافتراضي في حال لم نرسله من السيرفر
-      concrete: map['concrete_m3']?.toDouble() ?? 0.0, // التصحيح هنا
-      steel: map['steel_tons']?.toDouble() ?? 0.0, // التصحيح هنا
-      totalCost: map['total_cost']?.toDouble() ?? 0.0, // التصحيح هنا
+      count: map['count']?.toInt() ?? 1,
+      concrete: map['concrete_m3']?.toDouble() ?? 0.0,
+      steel: map['steel_tons']?.toDouble() ?? 0.0,
+      totalCost: map['total_cost']?.toDouble() ?? 0.0,
     );
   }
 

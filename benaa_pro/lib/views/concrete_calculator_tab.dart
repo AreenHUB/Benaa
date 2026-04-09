@@ -31,7 +31,6 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. بطاقة الحاسبة
           Card(
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -51,7 +50,6 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
                   ),
                   const SizedBox(height: 15),
 
-                  // اختيار النوع والعدد
                   Row(
                     children: [
                       Expanded(
@@ -87,7 +85,6 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
                   ),
                   const SizedBox(height: 10),
 
-                  // الأبعاد
                   Row(
                     children: [
                       Expanded(
@@ -155,7 +152,6 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
             ),
           ),
 
-          // 2. عرض النتائج
           if (state.calculationResult != null) ...[
             const SizedBox(height: 15),
             Container(
@@ -194,7 +190,6 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
             ),
           ],
 
-          // 3. مستشار الطقس
           const SizedBox(height: 20),
           Card(
             child: Padding(

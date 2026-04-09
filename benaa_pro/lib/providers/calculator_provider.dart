@@ -4,7 +4,6 @@ import '../core/api_client.dart';
 import '../models/calculation_record.dart';
 import '../services/history_service.dart';
 
-// حالة الشاشة (هل هي تحمل؟ هل هناك خطأ؟ أم هناك بيانات؟)
 class AppState {
   final bool isLoading;
   final String? error;
@@ -36,7 +35,6 @@ class AppState {
 class AppNotifier extends StateNotifier<AppState> {
   AppNotifier() : super(AppState());
 
-  // دالة حساب السقف
   Future<void> calculateElement({
     required String elementType,
     required int count,
@@ -54,7 +52,7 @@ class AppNotifier extends StateNotifier<AppState> {
           "length": length,
           "width": width,
           "height_or_thickness": heightOrThickness,
-          // أرسلنا نسبة حديد تقريبية تعتمد على نوع العنصر
+
           "steel_ratio": elementType == "سقف"
               ? 120
               : (elementType == "عمود" ? 200 : 90),
@@ -62,11 +60,8 @@ class AppNotifier extends StateNotifier<AppState> {
       );
       final resultData = response.data['data'];
 
-      // ==========================================
-      // الحفظ التلقائي في السجل (الجديد هنا)
-      // ==========================================
       final record = CalculationRecord(
-        date: DateTime.now().toString().split('.')[0], // لحفظ الوقت والتاريخ
+        date: DateTime.now().toString().split('.')[0],
         elementType: resultData['element_type'],
         count: resultData['count'],
         concrete: resultData['concrete_m3'],
@@ -74,7 +69,6 @@ class AppNotifier extends StateNotifier<AppState> {
         totalCost: resultData['financials_aed']['total_cost'],
       );
       await HistoryService.saveRecord(record);
-      // ==========================================
 
       state = state.copyWith(isLoading: false, calculationResult: resultData);
     } on DioException catch (e) {
@@ -87,7 +81,6 @@ class AppNotifier extends StateNotifier<AppState> {
     }
   }
 
-  // دالة مستشار الطقس
   Future<void> getWeatherAdvice(String city) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -105,7 +98,6 @@ class AppNotifier extends StateNotifier<AppState> {
   }
 }
 
-// الـ Provider الذي سيستخدمه الـ UI للوصول للبيانات
 final appProvider = StateNotifierProvider<AppNotifier, AppState>(
   (ref) => AppNotifier(),
 );

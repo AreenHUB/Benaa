@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 
-// حولناها إلى ConsumerStatefulWidget لنتمكن من استخدام ref
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -61,8 +60,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch, // لجعل الأزرار تأخذ العرض كاملاً
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
               "إعدادات التقارير الرسمية",
@@ -110,7 +108,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
 
-            const Spacer(), // لدفع زر تسجيل الخروج لأسفل الشاشة
+            const Spacer(),
             const Divider(),
 
             // زر تسجيل الخروج
@@ -128,9 +126,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               onPressed: () {
-                // 1. مسح التوكن وتسجيل الخروج
                 ref.read(authProvider.notifier).logout();
-                // 2. الانتقال لشاشة الدخول ومسح الشاشات السابقة من الذاكرة
+
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => LoginScreen()),

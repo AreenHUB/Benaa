@@ -16,7 +16,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات عند بدء الشاشة
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(historyProvider.notifier).fetchHistory(refresh: true);
     });

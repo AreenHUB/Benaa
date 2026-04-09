@@ -9,7 +9,6 @@ class HistoryService {
     final prefs = await SharedPreferences.getInstance();
     List<String> historyList = prefs.getStringList(_storageKey) ?? [];
 
-    // إضافة العملية الجديدة في بداية القائمة (لإظهار الأحدث أولاً)
     historyList.insert(0, record.toJson());
 
     await prefs.setStringList(_storageKey, historyList);
@@ -23,7 +22,6 @@ class HistoryService {
     return historyList.map((item) => CalculationRecord.fromJson(item)).toList();
   }
 
-  // دالة لمسح السجل بالكامل (اختيارية للمستخدم)
   static Future<void> clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_storageKey);
