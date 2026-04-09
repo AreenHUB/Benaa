@@ -158,21 +158,60 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: const Color(0xFF1E3A8A)),
+                border: Border.all(color: const Color(0xFF1E3A8A), width: 2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
-                  Text(
-                    "التكلفة: ${state.calculationResult!['financials_aed']['total_cost']} AED",
-                    style: const TextStyle(
-                      fontSize: 20,
+                  const Text(
+                    "نتائج الحساب التقديرية",
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E3A8A),
                     ),
                   ),
+                  const Divider(),
+                  _buildResultRow(
+                    "حجم الخرسانة:",
+                    "${state.calculationResult!['concrete_m3']} m³",
+                  ),
+                  _buildResultRow(
+                    "وزن الحديد:",
+                    "${state.calculationResult!['steel_tons']} طن",
+                  ),
+                  const Divider(),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "التكلفة التقديرية المبدئية",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        Text(
+                          "${state.calculationResult!['total_cost']} AED",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.share),
-                    label: const Text("مشاركة التقرير"),
+                    label: const Text("مشاركة تقرير PDF"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[700],
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: () async {
                       final file = await ReportService.generateMaterialReport(
                         concrete: state.calculationResult!['concrete_m3']
@@ -182,14 +221,13 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
                       );
                       await Share.shareXFiles([
                         XFile(file.path),
-                      ], text: 'تقرير Benaa Pro');
+                      ], text: 'تقرير الكميات من Benaa Pro');
                     },
                   ),
                 ],
               ),
             ),
           ],
-
           const SizedBox(height: 20),
           Card(
             child: Padding(
@@ -228,4 +266,20 @@ class _ConcreteCalculatorTabState extends ConsumerState<ConcreteCalculatorTab> {
       ),
     );
   }
+}
+
+Widget _buildResultRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 15)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
 }

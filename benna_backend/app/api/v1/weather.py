@@ -1,39 +1,53 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 import httpx
-import os
-from dotenv import load_dotenv
+from app.core.config import settings
+from app.core.logger import get_logger
+from app.core.exceptions import BenaaException
 
-load_dotenv()
-WEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-
+logger = get_logger(__name__)
 router = APIRouter()
 
 
 @router.get("/advisor/weather/{city}")
 async def get_pouring_advice(city: str):
-    if not WEATHER_API_KEY:
-        raise HTTPException(status_code=500, detail="Weather API Key is missing")
+    """جلب بيانات الطقس وتقديم نصيحة هندسية للصب."""
+    logger.info(f"طلب نصيحة صب لمدينة: {city}")
 
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city},AE&appid={WEATHER_API_KEY}&units=metric"
+    if not settings.OPENWEATHER_API_KEY:
+        logger.critical("مفتاح OpenWeather API مفقود في الإعدادات!")
+        raise BenaaException(message="خدمة الطقس غير مفعلة حالياً", status_code=500)
+
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city},AE&appid={settings.OPENWEATHER_API_KEY}&units=metric"
 
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, timeout=5.0)
+            if response.status_code == 404:
+                logger.warning(f"المدينة غير موجودة: {city}")
+                raise BenaaException(
+                    message="لم يتم العثور على المدينة المحددة في الإمارات",
+                    status_code=404,
+                )
+
             if response.status_code != 200:
-                raise HTTPException(status_code=404, detail="City not found")
+                raise BenaaException(
+                    message="فشل الاتصال بخدمة الطقس العالمية", status_code=502
+                )
 
             data = response.json()
             temp = data["main"]["temp"]
             wind = data["wind"]["speed"]
 
             is_safe = temp <= 35 and wind <= 10
-
             advice_ar = "الطقس ممتاز للصب."
             if temp > 35:
-                advice_ar = "تنبيه (الكود الإماراتي): درجة الحرارة تجاوزت 35 مئوية. يجب استخدام ثلج ومبطئات شك، ويفضل الصب ليلاً."
+                advice_ar = "تنبيه: الحرارة مرتفعة (>35°). استخدم الثلج ومبطئات الشك ويفضل الصب ليلاً."
             elif wind > 10:
-                advice_ar = "تنبيه: رياح قوية قد تسبب (Plastic Shrinkage). قم بتجهيز الخيش والماء للرش فوراً."
+                advice_ar = (
+                    "تنبيه: رياح قوية. خطر جفاف السطح السريع، جهز وسائل المعالجة فوراً."
+                )
 
+            logger.info(f"تم تقديم النصيحة لمدينة {city}: Safe={is_safe}")
             return {
                 "success": True,
                 "data": {
@@ -44,5 +58,6 @@ async def get_pouring_advice(city: str):
                     "advice": advice_ar,
                 },
             }
-        except httpx.RequestError:
-            raise HTTPException(status_code=503, detail="Weather service unavailable")
+        except httpx.RequestError as e:
+            logger.error(f"خطأ في الاتصال بـ OpenWeather: {str(e)}")
+            raise BenaaException(message="خدمة الطقس غير متاحة مؤقتاً", status_code=503)

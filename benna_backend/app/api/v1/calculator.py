@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.models import Calculation
-from app.schemas.schemas import CalcInput
+from app.schemas.schemas import CalcInput, BlockInput
 from app.core.auth_deps import get_current_user
-from app.schemas.schemas import BlockInput
-from app.services.calc_service import calculate_block_logic
+from app.services.calc_service import calculate_block_logic, calculate_structural_logic
+from app.core.logger import get_logger
+from app.core.exceptions import BenaaException
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -16,52 +18,40 @@ def compute(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    """حساب كميات الخرسانة والحديد وحفظها."""
 
-    single_volume = data.length * data.width * data.height_or_thickness
-    total_volume = single_volume * data.count
-    waste_factor = 1.05 if data.element_type == "سقف" else 1.03
-
-    total_concrete = total_volume * waste_factor
-    steel_tons = (total_volume * 100) / 1000
-
-    concrete_cost = total_concrete * 320.0
-    steel_cost = steel_tons * 2600.0
-    total_cost = concrete_cost + steel_cost
-
-    new_calc = Calculation(
-        element_type=data.element_type,
-        concrete_m3=total_concrete,
-        steel_tons=steel_tons,
-        total_cost=total_cost,
-        user_id=current_user.id,
+    res = calculate_structural_logic(
+        data.element_type, data.count, data.length, data.width, data.height_or_thickness
     )
-    db.add(new_calc)
-    db.commit()
 
-    return {
-        "success": True,
-        "data": {
-            "element_type": data.element_type,
-            "count": data.count,
-            "concrete_m3": round(total_concrete, 2),
-            "steel_tons": round(steel_tons, 2),
-            "financials_aed": {
-                "concrete_cost": round(concrete_cost, 2),
-                "steel_cost": round(steel_cost, 2),
-                "total_cost": round(total_cost, 2),
-            },
-        },
-    }
+    try:
+        new_calc = Calculation(
+            element_type=data.element_type,
+            concrete_m3=res["concrete_m3"],
+            steel_tons=res["steel_tons"],
+            total_cost=res["total_cost"],
+            user_id=current_user.id,
+        )
+        db.add(new_calc)
+        db.commit()
+        logger.info(f"تم حفظ حساب إنشائي جديد للمستخدم {current_user.email}")
+        return {"success": True, "data": res}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"فشل حفظ الحساب في القاعدة: {str(e)}")
+        raise BenaaException(
+            message="فشل حفظ البيانات في السجل السحابي", status_code=500
+        )
 
 
 @router.get("/calculations/history")
 def get_history(
-    skip: int = 0,
-    limit: int = 20,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-
+    """جلب سجل الحسابات للمستخدم الحالي (Pagination)."""
     history_records = (
         db.query(Calculation)
         .filter(Calculation.user_id == current_user.id)
@@ -71,20 +61,20 @@ def get_history(
         .all()
     )
 
-    formatted_data = []
-    for record in history_records:
-        formatted_data.append(
+    return {
+        "success": True,
+        "data": [
             {
-                "id": record.id,
-                "element_type": record.element_type,
-                "concrete_m3": record.concrete_m3,
-                "steel_tons": record.steel_tons,
-                "total_cost": record.total_cost,
-                "date": "تم الحفظ سحابياً",
+                "id": r.id,
+                "element_type": r.element_type,
+                "concrete_m3": r.concrete_m3,
+                "steel_tons": r.steel_tons,
+                "total_cost": r.total_cost,
+                "date": "محفوظ سحابياً",
             }
-        )
-
-    return {"success": True, "data": formatted_data}
+            for r in history_records
+        ],
+    }
 
 
 @router.post("/calculations/blocks")
@@ -93,17 +83,22 @@ def compute_blocks(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    """حساب الطابوق وحفظ التكلفة التقديرية."""
+    res = calculate_block_logic(data.length, data.height)
 
-    result = calculate_block_logic(data.length, data.height)
+    est_cost = res["blocks"] * 3.5
 
-    new_calc = Calculation(
-        element_type="طابوق",
-        concrete_m3=0.0,
-        steel_tons=0.0,
-        total_cost=result["cement_bags"] * 15.0 + result["sand_m3"] * 50.0,
-        user_id=current_user.id,
-    )
-    db.add(new_calc)
-    db.commit()
-
-    return {"success": True, "data": result}
+    try:
+        new_calc = Calculation(
+            element_type="طابوق",
+            concrete_m3=0.0,
+            steel_tons=0.0,
+            total_cost=est_cost,
+            user_id=current_user.id,
+        )
+        db.add(new_calc)
+        db.commit()
+        return {"success": True, "data": res}
+    except Exception as e:
+        db.rollback()
+        raise BenaaException(message="فشل حفظ حساب الطابوق", status_code=500)

@@ -30,7 +30,7 @@ class CalculationRecord {
 
   factory CalculationRecord.fromMap(Map<String, dynamic> map) {
     return CalculationRecord(
-      date: map['date'] ?? 'تم الحفظ سحابياً',
+      date: map['date'] ?? 'محفوظ سحابياً',
       elementType: map['element_type'] ?? 'عنصر',
       count: map['count']?.toInt() ?? 1,
       concrete: map['concrete_m3']?.toDouble() ?? 0.0,
